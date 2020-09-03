@@ -22,7 +22,7 @@ class Server:
 
     def listen(self):
         # Wait for a connection (Max 5 in queue allowed)
-        self.sock.listen(5)
+        self.sock.listen()
         logger.info('Server is now listening for connections')
         while True:
             # Accept connection
@@ -32,7 +32,8 @@ class Server:
 
     def send_http_headers(self, conn, code, content_length=0, content_type="text/html; charset=UTF-8"):
         conn.send("HTTP/{} {}\r\n".format(self.http_version, code).encode())
-        conn.send("Content-Length: {}\r\n".format(content_length).encode())
+        if content_length != 0:
+            conn.send("Content-Length: {}\r\n".format(content_length).encode())
         conn.send("Server: quick-serve\r\n".encode())
         conn.send("Content-Type: {}\r\n\r\n".format(content_type).encode())
 
@@ -84,11 +85,14 @@ class Server:
 
             # Define Method, Resource, Version from request
             method = req[0]
-            resource = 'F:\\www' + req[1]
+            if req[1] == '' or req[1] == '/':
+                req[1] = '/index.html'
+            resource = 'F:/www' + req[1]
             client_version = req[2]
 
             # Check if the resource exists
             if path.isfile(resource):
+                logging.info("{} {} {}".format(address[0], "Accessed:", resource))
                 # Read the resource
                 resource_data = open(resource, "r").read()
                 content_length = len(resource_data.encode())
