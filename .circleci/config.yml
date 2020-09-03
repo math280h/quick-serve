@@ -4,11 +4,13 @@ jobs:
     working_directory: ~/quick-serve
     docker:
       - image: circleci/python:3.6.4
-  steps:
-    - checkout
-    - run: pip install -r dev-requirements.txt
-    - run:
-        - command |
-          python -m unittest discover src/tests
-    - store_test_results:
-        path: test-results
+  test:
+    steps:
+      - checkout
+      - run: pip install -r dev-requirements.txt
+      - run:
+          - name: Run unittest
+          - command |
+            python -m unittest discover src/tests
+      - store_test_results:
+          path: test-results
