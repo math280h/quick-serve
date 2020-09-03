@@ -7,6 +7,7 @@ jobs:
     steps:
       - checkout
       - run: sudo pip install -r dev-requirements.txt
+      - run: sudo mdkir /var/www && sudo echo "<h1>This is an HTML File</h1>" > /var/www
       - run: sudo -b python src/server.py
       - run: python -m unittest discover src/tests
       - store_test_results:
