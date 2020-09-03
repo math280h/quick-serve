@@ -4,7 +4,6 @@ jobs:
     working_directory: ~/quick-serve
     docker:
       - image: circleci/python:3.6.4
-  test:
     steps:
       - checkout
       - run: pip install -r dev-requirements.txt
