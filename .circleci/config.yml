@@ -7,9 +7,6 @@ jobs:
     steps:
       - checkout
       - run: pip install -r dev-requirements.txt
-      - run:
-          - name: Run unittest
-          - command |
-            python -m unittest discover src/tests
+      - run: python -m unittest discover src/tests
       - store_test_results:
           path: test-results
