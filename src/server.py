@@ -4,6 +4,7 @@ import logging
 from logging.config import fileConfig
 from os import path
 import re
+import configparser
 
 
 class Server:
@@ -29,8 +30,11 @@ class Server:
             # Split connection into thread
             threading.Thread(target=self.handle_client, args=(client, address)).start()
 
-    def send_http_response(self, conn, code):
-        conn.send("HTTP/{} {}\r\n\r\n".format(self.http_version, code).encode())
+    def send_http_headers(self, conn, code, content_length=0, content_type="text/html; charset=UTF-8"):
+        conn.send("HTTP/{} {}\r\n".format(self.http_version, code).encode())
+        conn.send("Content-Length: {}\r\n".format(content_length).encode())
+        conn.send("Server: quick-serve\r\n".encode())
+        conn.send("Content-Type: {}\r\n\r\n".format(content_type).encode())
 
     def handle_client(self, conn, address):
         logger.info('Accepted connection from: {}'.format(address[0]))
@@ -53,28 +57,28 @@ class Server:
                 req_headers = request[1].split("\r\n")
             except UnicodeDecodeError as e:
                 logger.error('Decode Error: {}'.format(e))
-                self.send_http_response(conn, "500 Internal Server Error")
+                self.send_http_headers(conn, "500 Internal Server Error")
                 conn.close()
                 break
 
             # Make sure the request contains the minimum expected amount of data
             if len(req) < 3 or req[0] == '':
                 logger.error('{} sent an invalid request'.format(address[0]))
-                self.send_http_response(conn, "400 Bad Request")
+                self.send_http_headers(conn, "400 Bad Request")
                 conn.close()
                 break
 
             # Check for allowed methods
             if req[0] not in self.supported_methods:
                 logger.error('{} sent unknown method: {}'.format(address[0], req[0]))
-                self.send_http_response(conn, "405 Method Not Allowed")
+                self.send_http_headers(conn, "405 Method Not Allowed")
                 conn.close()
                 break
 
             # Check Version is valid
             if req[2].split('/')[0] != 'HTTP' or not re.match("^[0-9][.][0-9]$", req[2].split('/')[1]):
                 logger.error('{} sent an invalid request'.format(address[0]))
-                self.send_http_response(conn, "400 Bad Request")
+                self.send_http_headers(conn, "400 Bad Request")
                 conn.close()
                 break
 
@@ -87,13 +91,13 @@ class Server:
             if path.isfile(resource):
                 # Read the resource
                 resource_data = open(resource, "r").read()
-
+                content_length = len(resource_data.encode())
                 # Send Response
-                self.send_http_response(conn, "200 OK")
+                self.send_http_headers(conn, "200 OK", content_length=content_length)
                 conn.send("{}".format(resource_data).encode())
             else:
                 # Send 404 because file doesn't exists
-                self.send_http_response(conn, "404 Not Found")
+                self.send_http_headers(conn, "404 Not Found")
                 logger.info("404 - {} tried to access {}".format(address[0], resource))
                 conn.send("Sorry, that file does not exist".encode())
 
@@ -103,9 +107,13 @@ class Server:
 
 
 if __name__ == '__main__':
+    # Init Config File
+    config = configparser.ConfigParser()
+    config.sections()
+    config.read(path.dirname(path.abspath(__file__)), 'config.ini')
+
     # Init Log Config
-    log_file_path = path.join(path.dirname(path.abspath(__file__)), 'log_config.ini')
-    fileConfig(log_file_path)
+    fileConfig(path.join(path.dirname(path.abspath(__file__)), 'log_config.ini'))
     logger = logging.getLogger()
 
     # Start the HTTP Server
