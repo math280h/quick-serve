@@ -11,5 +11,3 @@ jobs:
       - run: sudo mkdir /var/www && sudo mv ~/index.html /var/www/
       - run: sudo -b python src/server.py
       - run: python -m unittest discover src/tests
-      - store_test_results:
-          path: test-results
