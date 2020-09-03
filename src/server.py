@@ -9,11 +9,12 @@ import configparser
 
 class Server:
     def __init__(self):
-        self.host = '127.0.0.1'
-        self.port = 80
-        self.size = 1024
-        self.supported_methods = ['GET', 'PUT', 'HEAD', 'POST', 'DELETE', 'OPTIONS']
-        self.http_version = '1.1'
+        self.host = config.get("Server", "ListenAddress")
+        self.port = int(config.get("Server", "Port"))
+        self.size = int(config.get("Server", "ByteReadSize"))
+        self.supported_methods = config.get("Server", "SupportedMethods[]")
+        self.http_version = config.get("Server", "HttpVersion")
+        self.extended_logging = config.get("General", "ExtendedLogging").lower() in ['true', '0']
 
         # Bind Socket & set Socket Options
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -44,7 +45,8 @@ class Server:
             try:
                 data = conn.recv(self.size)
             except (ConnectionResetError, ConnectionAbortedError) as e:
-                logging.info('Connection was closed by client: {}'.format(e))
+                if self.extended_logging:
+                    logging.info('Connection was closed by client: {}'.format(e))
                 break
             if not data:
                 break
@@ -57,14 +59,16 @@ class Server:
                 req = request[0].split()
                 req_headers = request[1].split("\r\n")
             except UnicodeDecodeError as e:
-                logger.error('Decode Error: {}'.format(e))
+                if self.extended_logging:
+                    logger.error('Decode Error: {}'.format(e))
                 self.send_http_headers(conn, "500 Internal Server Error")
                 conn.close()
                 break
 
             # Make sure the request contains the minimum expected amount of data
             if len(req) < 3 or req[0] == '':
-                logger.error('{} sent an invalid request'.format(address[0]))
+                if self.extended_logging:
+                    logger.error('{} sent an invalid request'.format(address[0]))
                 self.send_http_headers(conn, "400 Bad Request")
                 conn.close()
                 break
@@ -78,7 +82,8 @@ class Server:
 
             # Check Version is valid
             if req[2].split('/')[0] != 'HTTP' or not re.match("^[0-9][.][0-9]$", req[2].split('/')[1]):
-                logger.error('{} sent an invalid request'.format(address[0]))
+                if self.extended_logging:
+                    logger.error('{} sent an invalid request'.format(address[0]))
                 self.send_http_headers(conn, "400 Bad Request")
                 conn.close()
                 break
@@ -86,13 +91,14 @@ class Server:
             # Define Method, Resource, Version from request
             method = req[0]
             if req[1] == '' or req[1] == '/':
-                req[1] = '/index.html'
-            resource = 'F:/www' + req[1]
+                req[1] = config.get("Server", "DefaultFile")
+            resource = config.get("General", "WorkingDirectory") + req[1]
             client_version = req[2]
 
             # Check if the resource exists
             if path.isfile(resource):
-                logging.info("{} {} {}".format(address[0], "Accessed:", resource))
+                if self.extended_logging:
+                    logging.info("{} {} {}".format(address[0], "Accessed:", resource))
                 # Read the resource
                 resource_data = open(resource, "r").read()
                 content_length = len(resource_data.encode())
@@ -102,7 +108,8 @@ class Server:
             else:
                 # Send 404 because file doesn't exists
                 self.send_http_headers(conn, "404 Not Found")
-                logger.info("404 - {} tried to access {}".format(address[0], resource))
+                if self.extended_logging:
+                    logger.info("404 - {} tried to access {}".format(address[0], resource))
                 conn.send("Sorry, that file does not exist".encode())
 
             # Close Connection
@@ -110,11 +117,40 @@ class Server:
             break
 
 
+def check_config():
+    # Check Config - If it doesn't exists create defaults
+    # Check General Setcion
+    if not config.has_section("General"):
+        config.add_section("General")
+    if not config.has_option("General", "ExtendedLogging"):
+        config.set("General", "ExtendedLogging", "false")
+    if not config.has_option("General", "WorkingDirectory"):
+        config.set("General", "WorkingDirectory", "/var/www")
+
+    # Check Server Section
+    if not config.has_section("Server"):
+        config.add_section("General")
+    if not config.has_option("Server", "ListenAddress"):
+        config.set("Server", "ListenAddress", "127.0.0.1")
+    if not config.has_option("Server", "Port"):
+        config.set("Server", "Port", "80")
+    if not config.has_option("Server", "HttpVersion"):
+        config.set("Server", "HttpVersion", "1.1")
+    if not config.has_option("Server", "ByteReadSize"):
+        config.set("Server", "ByteReadSize", "1024")
+    if not config.has_option("Server", "DefaultFile"):
+        config.set("Server", "DefaultFile", "/index.html")
+    if not config.has_option("Server", "SupportedMethods[]"):
+        config.set("Server", "SupportedMethods[]", "GET, PUT, HEAD, POST, DELETE, OPTIONS")
+
+
 if __name__ == '__main__':
     # Init Config File
-    config = configparser.ConfigParser()
-    config.sections()
-    config.read(path.dirname(path.abspath(__file__)), 'config.ini')
+    config = configparser.RawConfigParser()
+    config.read(path.join(path.dirname(path.abspath(__file__)), 'config.ini'))
+
+    # Check Configuration
+    check_config()
 
     # Init Log Config
     fileConfig(path.join(path.dirname(path.abspath(__file__)), 'log_config.ini'))
