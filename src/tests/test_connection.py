@@ -1,37 +1,31 @@
-import socket
 import unittest
+import requests
 
 HOST = '127.0.0.1'
 PORT = 80
 
 
 class Connection(unittest.TestCase):
-    def test_welcome_message(self):
+    def test_headers(self):
         """
-        Test that we get a welcome message when connecting
+        Test that we get the correct headers when requesting OPTIONS
         :return:
         """
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((HOST, PORT))
-        data = sock.recv(1024).decode('UTF-8')
-        sock.close()
+        req = requests.options("http://127.0.0.1")
 
-        self.assertEqual(data, 'quick-serve (v0.0.1)\n')
+        self.assertEqual(req.headers, {'Allow': 'GET, PUT, HEAD, POST, DELETE, OPTIONS', 'Server': 'quick-serve',
+                                       'Content-Type': 'text/html; charset=UTF-8'})
 
     def test_connection(self):
         """
         Test that we can successfully connect to the server
         :return:
         """
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        success = True
-        try:
-            sock.connect((HOST, PORT))
-        except ConnectionError:
-            success = False
-        sock.close()
-        self.assertTrue(success)
+        req = requests.get("http://127.0.0.1")
+
+        self.assertEqual(req.status_code, 200)
 
 
 if __name__ == '__main__':
+    # Start Unit tests
     unittest.main()

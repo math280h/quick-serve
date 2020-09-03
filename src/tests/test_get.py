@@ -1,42 +1,29 @@
-import socket
+import requests
 import unittest
 
 HOST = '127.0.0.1'
 PORT = 80
 
 
-def get_last_response(payload):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((HOST, PORT))
-    sock.send(payload.encode())
-    while True:
-        data = sock.recv(2048).decode('UTF-8').splitlines()
-        if 'quick-serve' not in data:
-            data = sock.recv(2048).decode('UTF-8')
-            break
-    sock.close()
-    return data
-
-
 class Get(unittest.TestCase):
 
-    def test_undefined_word(self):
+    def test_get_content(self):
         """
-        Test that we get an error when asking for an undefined error
+        Test that we get content back when requesting default file
         :return:
         """
-        data = get_last_response("GET test")
+        req = requests.get("http://127.0.0.1/")
 
-        self.assertEqual(data, 'ERROR undefined\n', "Should be: ERROR undefined")
+        self.assertTrue(req.text)
 
-    def test_invalid(self):
+    def test_path_security(self):
         """
-        Test that we get an error when supplying invalid command
+        Test that we cannot access paths outside of the working directory
         :return:
         """
-        data = get_last_response("GET")
+        req = requests.get("http://127.0.0.1/../README.md")
 
-        self.assertEqual(data, 'ERROR invalid command\n')
+        self.assertEqual(req.status_code, 404)
 
 
 if __name__ == '__main__':
