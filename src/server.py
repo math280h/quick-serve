@@ -31,10 +31,12 @@ class Server:
             # Split connection into thread
             threading.Thread(target=self.handle_client, args=(client, address)).start()
 
-    def send_http_headers(self, conn, code, content_length=0, content_type="text/html; charset=UTF-8"):
+    def send_http_headers(self, conn, code, content_length=0, content_type="text/html; charset=UTF-8", allow=None):
         conn.send("HTTP/{} {}\r\n".format(self.http_version, code).encode())
         if content_length != 0:
             conn.send("Content-Length: {}\r\n".format(content_length).encode())
+        if allow is not None:
+            conn.send("Allow: {}\r\n".format(config.get("Server", "SupportedMethods[]")).encode())
         conn.send("Server: quick-serve\r\n".encode())
         conn.send("Content-Type: {}\r\n\r\n".format(content_type).encode())
 
@@ -103,21 +105,24 @@ class Server:
             client_version = req[2]
 
             # Check if the resource exists
-            if path.isfile(resource):
-                if self.extended_logging:
-                    logging.info("{} {} {}".format(address[0], "Accessed:", resource))
-                # Read the resource
-                resource_data = open(resource, "r").read()
-                content_length = len(resource_data.encode())
-                # Send Response
-                self.send_http_headers(conn, "200 OK", content_length=content_length)
-                conn.send("{}".format(resource_data).encode())
+            if method == 'OPTIONS':
+                self.send_http_headers(conn, "200 OK", allow=True)
             else:
-                # Send 404 because file doesn't exists
-                self.send_http_headers(conn, "404 Not Found")
-                if self.extended_logging:
-                    logger.info("404 - {} tried to access {}".format(address[0], resource))
-                conn.send("Sorry, that file does not exist".encode())
+                if path.isfile(resource):
+                    if self.extended_logging:
+                        logging.info("{} {} {}".format(address[0], "Accessed:", resource))
+                    # Read the resource
+                    resource_data = open(resource, "r").read()
+                    content_length = len(resource_data.encode())
+                    # Send Response
+                    self.send_http_headers(conn, "200 OK", content_length=content_length)
+                    conn.send("{}".format(resource_data).encode())
+                else:
+                    # Send 404 because file doesn't exists
+                    self.send_http_headers(conn, "404 Not Found")
+                    if self.extended_logging:
+                        logger.info("404 - {} tried to access {}".format(address[0], resource))
+                    conn.send("Sorry, that file does not exist".encode())
 
             # Close Connection
             conn.close()
