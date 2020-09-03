@@ -6,7 +6,7 @@ jobs:
       - image: circleci/python:3.6.4
     steps:
       - checkout
-      - run: pip install -r dev-requirements.txt
+      - run: sudo pip install -r dev-requirements.txt
       - run: python -m unittest discover src/tests
       - store_test_results:
           path: test-results
