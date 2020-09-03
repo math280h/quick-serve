@@ -1,4 +1,6 @@
 # quick-serve
+[![math280h](https://circleci.com/gh/math280h/quick-serve/tree/master.svg?style=svg)](https://app.circleci.com/pipelines/github/math280h/quick-serve)
+
 A very simple and limited HTTP Server.
 
 ## Running
@@ -64,8 +66,25 @@ Percentage of the requests served within a certain time (ms)
 
 ## Testing
 To run the unit tests you will first have to install requirements from the `dev-requirements.txt` file. This can be done using the following command:
-````commandline
+```commandline
 pip3 install -r dev-requirements.txt
-````
+```
 
-More coming soon...
+First make sure that the server is running locally on `127.0.0.1:80` then you can follow the below guide to run the tests.
+
+All tests are located `src/tests` and can be run by using the following command inside the directory:
+```commandline
+python -m unittest discover
+```
+
+### Current tests
+* Connection
+    * test_connection
+        * Test that we can successfully connect to the server
+    * test_headers
+        * Test that we get the correct headers when requesting OPTIONS 
+* Get
+    * test_get_content
+        * Test that we get content back when requesting default file
+    * test_secure_path
+        * Test that we cannot access paths outside of the working directory
