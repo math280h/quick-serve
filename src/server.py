@@ -46,7 +46,7 @@ class Server:
                 data = conn.recv(self.size)
             except (ConnectionResetError, ConnectionAbortedError) as e:
                 if self.extended_logging:
-                    logging.info('Connection was closed by client: {}'.format(e))
+                    logger.info('Connection was closed by client: {}'.format(e))
                 break
             if not data:
                 break
@@ -56,8 +56,15 @@ class Server:
                 request = data.decode('UTF-8').strip().split("\r\n", 1)
 
                 # Define Request and Request Headers
-                req = request[0].split()
-                req_headers = request[1].split("\r\n")
+                try:
+                    req = request[0].split()
+                    req_headers = request[1].split("\r\n")
+                except IndexError:
+                    if self.extended_logging:
+                        logger.error('Request failed because no headers were present')
+                    self.send_http_headers(conn, "400 Bad Request")
+                    conn.close()
+                    break
             except UnicodeDecodeError as e:
                 if self.extended_logging:
                     logger.error('Decode Error: {}'.format(e))
