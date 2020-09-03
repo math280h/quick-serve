@@ -1,9 +1,9 @@
 import socket
 import threading
-
-
-def expected_args(cmd, n):
-    return len(cmd) >= n
+import logging
+from logging.config import fileConfig
+from os import path
+import re
 
 
 class Server:
@@ -11,7 +11,9 @@ class Server:
         self.host = '127.0.0.1'
         self.port = 80
         self.size = 1024
-        self.words = {}
+        self.supported_methods = ['GET', 'PUT', 'HEAD', 'POST', 'DELETE', 'OPTIONS']
+        self.http_version = '1.1'
+
         # Bind Socket & set Socket Options
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -20,73 +22,92 @@ class Server:
     def listen(self):
         # Wait for a connection (Max 5 in queue allowed)
         self.sock.listen(5)
+        logger.info('Server is now listening for connections')
         while True:
             # Accept connection
             client, address = self.sock.accept()
             # Split connection into thread
             threading.Thread(target=self.handle_client, args=(client, address)).start()
 
+    def send_http_response(self, conn, code):
+        conn.send("HTTP/{} {}\r\n\r\n".format(self.http_version, code).encode())
+
     def handle_client(self, conn, address):
+        logger.info('Accepted connection from: {}'.format(address[0]))
         while True:
             # Recieve Data
             try:
                 data = conn.recv(self.size)
             except (ConnectionResetError, ConnectionAbortedError) as e:
-                print("Connection was closed by client")
+                logging.info('Connection was closed by client: {}'.format(e))
                 break
             if not data:
                 break
 
             # Decode Data
             try:
-                command = data.decode('UTF-8').strip().split()
+                request = data.decode('UTF-8').strip().split("\r\n", 1)
+
+                # Define Request and Request Headers
+                req = request[0].split()
+                req_headers = request[1].split("\r\n")
             except UnicodeDecodeError as e:
-                print("Error: " + e.reason)
-                conn.send("ERROR invalid command\n".encode())
+                logger.error('Decode Error: {}'.format(e))
+                self.send_http_response(conn, "500 Internal Server Error")
+                conn.close()
+                break
 
-            # Make sure there is a command
-            if len(command) == 0 or command[0] == '':
-                conn.send("ERROR invalid command\n".encode())
+            # Make sure the request contains the minimum expected amount of data
+            if len(req) < 3 or req[0] == '':
+                logger.error('{} sent an invalid request'.format(address[0]))
+                self.send_http_response(conn, "400 Bad Request")
+                conn.close()
+                break
 
-            # Check for specific commands
-            print("New Command: " + str(command))
-            if command[0] == 'GET' and expected_args(command, 2) and command[1] != '':
-                # Get a word description
-                if command[1] in self.words:
-                    answer = "ANSWER " + self.words[command[1]] + "\n"
-                    conn.send(answer.encode())
-                else:
-                    conn.send("ERROR undefined\n".encode())
-            elif command[0] == 'SET' and expected_args(command, 3) and command[1] != '' and command[2] != '':
-                # Set a new word and it's description
-                if command[1] not in self.words:
-                    desc = ""
-                    for i, d in enumerate(command):
-                        if i != 0 and i != 1:
-                            if i == 2:
-                                desc += d
-                            else:
-                                desc += " " + d
-                    self.words[command[1]] = desc
-                    conn.send("OK saved word description\n".encode())
-                else:
-                    conn.send("ERROR already defined\n".encode())
-            elif command[0] == 'CLEAR':
-                # Clear all currently stored words
-                self.words = {}
-                conn.send("OK cleared all descriptions\n".encode())
-            elif command[0] == 'ALL':
-                # List all words
-                if len(self.words) == 0:
-                    conn.send("ERROR no stored words\n".encode())
-                else:
-                    conn.send("OK all stored words below\n".encode())
-                    for w in self.words.keys():
-                        msg = w + " " + self.words[w] + "\n"
-                        conn.send(msg.encode())
+            # Check for allowed methods
+            if req[0] not in self.supported_methods:
+                logger.error('{} sent unknown method: {}'.format(address[0], req[0]))
+                self.send_http_response(conn, "405 Method Not Allowed")
+                conn.close()
+                break
+
+            # Check Version is valid
+            if req[2].split('/')[0] != 'HTTP' or not re.match("^[0-9][.][0-9]$", req[2].split('/')[1]):
+                logger.error('{} sent an invalid request'.format(address[0]))
+                self.send_http_response(conn, "400 Bad Request")
+                conn.close()
+                break
+
+            # Define Method, Resource, Version from request
+            method = req[0]
+            resource = 'F:\\www' + req[1]
+            client_version = req[2]
+
+            # Check if the resource exists
+            if path.isfile(resource):
+                # Read the resource
+                resource_data = open(resource, "r").read()
+
+                # Send Response
+                self.send_http_response(conn, "200 OK")
+                conn.send("{}".format(resource_data).encode())
             else:
-                conn.send("ERROR invalid command\n".encode())
+                # Send 404 because file doesn't exists
+                self.send_http_response(conn, "404 Not Found")
+                logger.info("404 - {} tried to access {}".format(address[0], resource))
+                conn.send("Sorry, that file does not exist".encode())
+
+            # Close Connection
+            conn.close()
+            break
 
 
 if __name__ == '__main__':
+    # Init Log Config
+    log_file_path = path.join(path.dirname(path.abspath(__file__)), 'log_config.ini')
+    fileConfig(log_file_path)
+    logger = logging.getLogger()
+
+    # Start the HTTP Server
+    logger.info('Starting HTTP Server')
     Server().listen()
