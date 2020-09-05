@@ -13,8 +13,7 @@ class Connection(unittest.TestCase):
         """
         req = requests.options("http://127.0.0.1")
 
-        self.assertEqual(req.headers, {'Allow': 'GET, PUT, HEAD, POST, DELETE, OPTIONS', 'Server': 'quick-serve',
-                                       'Content-Type': 'text/html; charset=UTF-8'})
+        self.assertEqual(req.headers, {'Server': 'quick-serve','Allow': 'GET, PUT, HEAD, POST, DELETE, OPTIONS'})
 
     def test_connection(self):
         """
