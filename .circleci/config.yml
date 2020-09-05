@@ -9,5 +9,5 @@ jobs:
       - run: sudo pip install -r dev-requirements.txt
       - run: echo "<h1>This is an HTML File</h1>" > ~/index.html
       - run: sudo mkdir /var/www && sudo mv ~/index.html /var/www/
-      - run: cd src && sudo -b python server.py
-      - run: python -m unittest discover tests
+      - run: sudo -b python quick-serve.py
+      - run: python -m unittest discover src/tests
