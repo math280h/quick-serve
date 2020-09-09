@@ -1,10 +1,7 @@
-from src.modules.config import Config
-
-
 class Messenger:
-    def __init__(self, conn):
+    def __init__(self, config, conn):
         self.conn = conn
-        self.config = Config()
+        self.config = config
 
     def send(self, data):
         try:

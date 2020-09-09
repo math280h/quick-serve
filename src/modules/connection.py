@@ -1,21 +1,20 @@
-from src.modules.log import Log
 from os import path
 from io import BytesIO
+
 from src.modules import Parser
 from src.modules import Methods
 from src.modules import Messenger
-from src.modules import Config
 
 
 class Connection:
-    def __init__(self, conn, address):
+    def __init__(self, config, log, conn, address):
         self.conn = conn
         self.address = address
 
-        self.log = Log()
-        self.config = Config()
+        self.log = log
+        self.config = config
         self.parser = Parser()
-        self.messenger = Messenger(conn)
+        self.messenger = Messenger(config, conn)
 
     def handle(self):
         self.log.info('Accepted connection from: {}'.format(self.address[0]))
@@ -58,7 +57,7 @@ class Connection:
                 data[1] = self.config.options.get("Server", "DefaultFile")
             resource = self.config.options.get("General", "WorkingDirectory") + data[1]
 
-            if not Methods().is_allowed(method):
+            if not Methods(self.config).is_allowed(method):
                 self.messenger.send_headers("405 Method Not Allowed")
                 self.conn.close()
                 return

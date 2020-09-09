@@ -1,14 +1,12 @@
 import socket
 import threading
-from src.modules import Config
-from src.modules import Log
 from src.modules import Connection
 
 
 class Server:
-    def __init__(self):
-        self.config = Config()
-        self.log = Log()
+    def __init__(self, config, log):
+        self.config = config
+        self.log = log
 
         self.host = self.config.options.get("Server", "ListenAddress")
         self.port = int(self.config.options.get("Server", "Port"))
@@ -20,11 +18,11 @@ class Server:
         self.sock.bind((self.host, self.port))
 
     def listen(self):
-        # Wait for a connection (Max 5 in queue allowed)
+        # Wait for a connection
         self.sock.listen()
         self.log.info('Server is now listening for connections')
         while True:
             # Accept connection
             client, address = self.sock.accept()
             # Split connection into thread
-            threading.Thread(target=Connection(client, address).handle).start()
+            threading.Thread(target=Connection(self.config, self.log, client, address).handle).start()

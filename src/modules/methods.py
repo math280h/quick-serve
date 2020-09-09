@@ -1,9 +1,6 @@
-from src.modules.config import Config
-
-
 class Methods:
-    def __init__(self):
-        self.config = Config()
+    def __init__(self, config):
+        self.config = config
         self.allowed_methods = self.config.options.get("Server", "SupportedMethods[]")
 
     def is_allowed(self, method):
