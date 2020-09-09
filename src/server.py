@@ -1,5 +1,8 @@
 import socket
-import threading
+import signal
+import sys
+from concurrent.futures import ThreadPoolExecutor
+
 from src.modules import Connection
 
 
@@ -7,6 +10,9 @@ class Server:
     def __init__(self, config, log):
         self.config = config
         self.log = log
+
+        self.shutdown = False
+        signal.signal(signal.SIGINT, self.signal_handler)
 
         self.host = self.config.options.get("Server", "ListenAddress")
         self.port = int(self.config.options.get("Server", "Port"))
@@ -17,6 +23,10 @@ class Server:
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((self.host, self.port))
 
+    def signal_handler(self):
+        self.log.info("Shutting Down.")
+        self.shutdown = True
+
     def listen(self):
         # Wait for a connection
         self.sock.listen()
@@ -25,4 +35,8 @@ class Server:
             # Accept connection
             client, address = self.sock.accept()
             # Split connection into thread
-            threading.Thread(target=Connection(self.config, self.log, client, address).handle).start()
+            with ThreadPoolExecutor() as executor:
+                if self.shutdown:
+                    executor.shutdown(wait=True)
+                    sys.exit(0)
+                executor.submit(Connection(self.config, self.log, client, address).handle)
