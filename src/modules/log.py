@@ -11,6 +11,8 @@ class Log:
 
         if config.options.get("General", "ExtendedLogging").lower() in ['true', '0']:
             self.logger.setLevel('DEBUG')
+        else:
+            self.logger.setLevel('ERROR')
 
     def info(self, data):
         self.logger.info(data)
