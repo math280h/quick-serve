@@ -1,7 +1,7 @@
 import socket
 import signal
 import sys
-from concurrent.futures import ThreadPoolExecutor
+import asyncio
 
 from src.modules import Connection
 
@@ -13,7 +13,6 @@ class Server:
 
         self.shutdown = False
         signal.signal(signal.SIGINT, self.signal_handler)
-        self.executor = ThreadPoolExecutor()
 
         self.host = self.config.options.get("Server", "ListenAddress")
         self.port = int(self.config.options.get("Server", "Port"))
@@ -29,6 +28,7 @@ class Server:
             self.log.info("Shutting Down.")
             self.shutdown = True
             self.sock.close()
+            sys.exit(0)
 
     def listen(self):
         # Wait for a connection
@@ -40,11 +40,5 @@ class Server:
                 client, address = self.sock.accept()
             except OSError:
                 self.log.debug("Closing Socket...")
-            # Split connection into thread
-            with ThreadPoolExecutor() as executor:
-                if self.shutdown:
-                    self.log.debug("Shutting down workers...")
-                    executor.shutdown(wait=True)
-                    sys.exit(0)
-                else:
-                    executor.submit(Connection(self.config, self.log, client, address).handle)
+            # Create a task for the connection
+            asyncio.create_task(Connection(self.config, self.log, client, address).handle())

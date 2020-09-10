@@ -16,6 +16,17 @@ class Connection:
         self.parser = Parser()
         self.messenger = Messenger(config, conn)
 
+    def gather_resource(self, resource):
+        if path.isfile(resource):
+            self.log.debug("{} {} {}".format(self.address[0], "Accessed:", resource))
+            # Read the resource
+            with open(resource, "r") as resource:
+                data = resource.read()
+                content_length = len(data.encode())
+            return data, content_length
+        else:
+            return False, None
+
     def handle(self):
         self.log.info('Accepted connection from: {}'.format(self.address[0]))
         state = ''
@@ -52,9 +63,21 @@ class Connection:
                     else:
                         body += line.decode(self.parser.encoding)
 
-            method = data[0]
-            if data[1] == '' or data[1] == '/':
-                data[1] = self.config.options.get("Server", "DefaultFile")
+            try:
+                method = data[0]
+            except IndexError:
+                self.messenger.send_headers("400 Bad Request")
+                self.conn.close()
+                return
+
+            try:
+                if data[1] == '' or data[1] == '/':
+                    data[1] = self.config.options.get("Server", "DefaultFile")
+            except IndexError:
+                self.messenger.send_headers("400 Bad Request")
+                self.conn.close()
+                return
+
             resource = self.config.options.get("General", "WorkingDirectory") + data[1]
 
             if not Methods(self.config).is_allowed(method):
@@ -65,15 +88,11 @@ class Connection:
             if method == 'OPTIONS':
                 self.messenger.send_headers("200 OK", allow=True)
             else:
-                if path.isfile(resource):
-                    self.log.debug("{} {} {}".format(self.address[0], "Accessed:", resource))
-                    # Read the resource
-                    with open(resource, "r") as resource:
-                        data = resource.read()
-                        content_length = len(data.encode())
-                        # Send Response
-                        self.messenger.send_headers("200 OK", content_length=content_length)
-                        self.messenger.send(data)
+                data, content_length = self.gather_resource(resource)
+                if data is not False and content_length is not None:
+                    # Send Response
+                    self.messenger.send_headers("200 OK", content_length=content_length)
+                    self.messenger.send(data)
                 else:
                     # Send 404 because file doesn't exists
                     self.messenger.send_headers("404 Not Found")

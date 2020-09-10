@@ -1,3 +1,5 @@
+import asyncio
+
 from src.modules import Log
 from src.modules import Config
 from src.server import Server
