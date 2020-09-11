@@ -13,4 +13,4 @@ if __name__ == '__main__':
 
     # Start the HTTP Server
     log.info('Starting HTTP Server')
-    Server(config, log).listen()
+    asyncio.run(Server(config, log).listen())

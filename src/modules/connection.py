@@ -27,7 +27,7 @@ class Connection:
         else:
             return False, None
 
-    def handle(self):
+    async def handle(self):
         self.log.info('Accepted connection from: {}'.format(self.address[0]))
         state = ''
         with BytesIO() as buffer:
@@ -101,3 +101,4 @@ class Connection:
 
             # Close connection when we have finished handling the request
             self.conn.close()
+            return

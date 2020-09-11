@@ -30,7 +30,7 @@ class Server:
             self.sock.close()
             sys.exit(0)
 
-    def listen(self):
+    async def listen(self):
         # Wait for a connection
         self.sock.listen()
         self.log.info('Server is now listening for connections')
@@ -41,4 +41,4 @@ class Server:
             except OSError:
                 self.log.debug("Closing Socket...")
             # Create a task for the connection
-            asyncio.create_task(Connection(self.config, self.log, client, address).handle())
+            await asyncio.create_task(Connection(self.config, self.log, client, address).handle())
