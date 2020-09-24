@@ -3,9 +3,10 @@ jobs:
   build:
     working_directory: ~/quick-serve
     docker:
-      - image: circleci/python:3.6.4
+      - image: circleci/python:3.8.5
     steps:
       - checkout
+      - run: sudo pip install --upgrade pip
       - run: sudo pip install -r dev-requirements.txt
       - run: echo "<h1>This is an HTML File</h1>" > ~/index.html
       - run: sudo mkdir /var/www && sudo mv ~/index.html /var/www/
