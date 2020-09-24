@@ -22,3 +22,6 @@ class Log:
 
     def debug(self, data):
         self.logger.debug(data)
+
+    def critical(self, data):
+        self.logger.critical(data)

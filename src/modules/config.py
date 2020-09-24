@@ -7,7 +7,6 @@ class Config:
         # Init Config File
         self.options = configparser.RawConfigParser()
         self.options.read(path.join(path.dirname(path.dirname(path.abspath(__file__))), 'config.ini'))
-
         self.check_config()
 
     def check_config(self):

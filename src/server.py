@@ -38,7 +38,12 @@ class Server:
             # Accept connection
             try:
                 client, address = self.sock.accept()
-            except OSError:
-                self.log.debug("Closing Socket...")
+            except OSError as e:
+                if self.shutdown:
+                    self.log.debug("Closing Socket...")
+                else:
+                    self.log.critical("OSError Panic! Closing Socket... - {}".format(e))
+                    self.sock.close()
+                    sys.exit(0)
             # Create a task for the connection
             await asyncio.create_task(Connection(self.config, self.log, client, address).handle())
