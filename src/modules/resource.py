@@ -1,5 +1,4 @@
 import aiofiles
-import diskcache
 
 from os import path
 
