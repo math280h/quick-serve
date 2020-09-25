@@ -43,28 +43,28 @@ This log contains configuration used by the `logger` package from python3, docum
 quick-serve uses `asyncio` to handle many requests, once a connection is accepted it's moved into it's own task.
 
 ````
-Requests per second:    7602.70 [#/sec] (mean)
-Time per request:       65.766 [ms] (mean)
-Time per request:       0.132 [ms] (mean, across all concurrent requests)
-Transfer rate:          152.79 [Kbytes/sec] received
+Requests per second:    9192.41 [#/sec] (mean)
+Time per request:       54.393 [ms] (mean)
+Time per request:       0.109 [ms] (mean, across all concurrent requests)
+Transfer rate:          445.31 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0   25   7.4     25      46
-Processing:     4   37  28.1     26     121
-Waiting:        0   14  30.4      0      97
-Total:         10   62  29.7     50     145
+Connect:        0   23   3.2     23      60
+Processing:     4   31  11.6     24      91
+Waiting:        0   12  14.6      0      72
+Total:         19   54  12.0     49     120
 
 Percentage of the requests served within a certain time (ms)
-  50%     50
-  66%     51
-  75%     54
-  80%     56
-  90%    125
-  95%    132
-  98%    137
-  99%    141
- 100%    145 (longest request)
+  50%     49
+  66%     62
+  75%     65
+  80%     67
+  90%     70
+  95%     73
+  98%     76
+  99%     79
+ 100%    120 (longest request)
 ````
 
 ## Testing

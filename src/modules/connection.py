@@ -1,9 +1,9 @@
-from os import path
 from io import BytesIO
 
-from src.modules import Parser
-from src.modules import Methods
-from src.modules import Messenger
+from src.modules.parser import Parser
+from src.modules.methods import Methods
+from src.modules.messenger import Messenger
+from src.modules.resource import Resource
 
 
 class Connection:
@@ -15,17 +15,7 @@ class Connection:
         self.config = config
         self.parser = Parser()
         self.messenger = Messenger(config, conn)
-
-    def gather_resource(self, resource):
-        if path.isfile(resource):
-            self.log.debug("{} {} {}".format(self.address[0], "Accessed:", resource))
-            # Read the resource
-            with open(resource, "r") as resource:
-                data = resource.read()
-                content_length = len(data.encode())
-            return data, content_length
-        else:
-            return False, None
+        self.resource = Resource(config, log)
 
     async def handle(self):
         self.log.info('Accepted connection from: {}'.format(self.address[0]))
@@ -33,7 +23,7 @@ class Connection:
         with BytesIO() as buffer:
             while True:
                 try:
-                    req = self.conn.recv(1024)
+                    req = self.conn.recv(int(self.config.options.get("Server", "ByteReadSize")))
                 except (BlockingIOError, ConnectionAbortedError, ConnectionResetError) as e:
                     self.log.debug('Connection was closed by client: {}'.format(e))
                 if not req:
@@ -88,10 +78,11 @@ class Connection:
             if method == 'OPTIONS':
                 self.messenger.send_headers("200 OK", allow=True)
             else:
-                data, content_length = self.gather_resource(resource)
+                data, content_length = await self.resource.get(resource, self.address[0])
                 if data is not False and content_length is not None:
                     # Send Response
                     self.messenger.send_headers("200 OK", content_length=content_length)
+                    self.log.debug("Sent {} with content_length: {}".format("200 OK", content_length))
                     self.messenger.send(data)
                 else:
                     # Send 404 because file doesn't exists
@@ -100,5 +91,6 @@ class Connection:
                     self.log.debug("404 - {} tried to access {}".format(self.address[0], resource))
 
             # Close connection when we have finished handling the request
+            self.log.debug("Closing Connection with: {}".format(self.address[0]))
             self.conn.close()
             return
