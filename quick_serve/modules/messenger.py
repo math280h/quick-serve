@@ -24,7 +24,7 @@ class Messenger:
         :param allow: Send Allow Header (Used for 'OPTIONS' Request)
         :return: Headers as string
         """
-        headers = "HTTP/{} {}\r\nServer: quick_serve\r\n".format(self.config.options.get("Server", "HttpVersion"), code)
+        headers = "HTTP/{} {}\r\nServer: quick-serve\r\n".format(self.config.options.get("Server", "HttpVersion"), code)
         if content_length != 0:  # If Content-Length is present, append header
             headers += "Content-Length: {}\r\nContent-Type: {}\r\n".format(content_length, content_type)
         if allow is not None:  # If Allow is present, append header

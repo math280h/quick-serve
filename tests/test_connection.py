@@ -17,7 +17,7 @@ class Connection(unittest.TestCase):
         """
         req = requests.options("http://{}:{}".format(self.config.options.get("Server", "ListenAddress"), self.config.options.get("Server", "Port")))
 
-        self.assertEqual(req.headers, {'Server': 'quick_serve', 'Allow': 'GET, PUT, HEAD, POST, DELETE, OPTIONS'})
+        self.assertEqual(req.headers, {'Server': 'quick-serve', 'Allow': 'GET, PUT, HEAD, POST, DELETE, OPTIONS'})
 
     def test_connection(self):
         """

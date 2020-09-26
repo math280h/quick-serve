@@ -35,7 +35,8 @@ quick-serve has two different config files, on for defining log configuration kn
         * Path - Default: /index.html - This specifies the file quick-serve should refer to if the requested resource is e.g. `/`
     * SupportedMethods[]
         * Array of HTTP Methods - Default: GET, PUT, HEAD, POST, DELETE, OPTIONS - This specifies what HTTP Methods is supported by quick-serve
-
+    * DefaultEncoding
+        * Encoding - Default UTF-8 - This specifies the encoding to use if none is specified in request headers
 #### log_config.ini
 This log contains configuration used by the `logger` package from python3, documentation on this config can be found here [here](https://docs.python.org/3/howto/logging.html#configuring-logging)
 
@@ -43,28 +44,28 @@ This log contains configuration used by the `logger` package from python3, docum
 quick-serve uses `asyncio` to handle many requests, once a connection is accepted it's moved into it's own task.
 
 ````
-Requests per second:    9192.41 [#/sec] (mean)
-Time per request:       54.393 [ms] (mean)
-Time per request:       0.109 [ms] (mean, across all concurrent requests)
-Transfer rate:          445.31 [Kbytes/sec] received
+Requests per second:    9270.46 [#/sec] (mean)
+Time per request:       32.361 [ms] (mean)
+Time per request:       0.108 [ms] (mean, across all concurrent requests)
+Transfer rate:          371.97 [Kbytes/sec] received
 
 Connection Times (ms)
               min  mean[+/-sd] median   max
-Connect:        0   23   3.2     23      60
-Processing:     4   31  11.6     24      91
-Waiting:        0   12  14.6      0      72
-Total:         19   54  12.0     49     120
+Connect:        0   10   2.1     10      27
+Processing:     2   21  16.0     10      54
+Waiting:        0   12  17.1      0      45
+Total:          4   32  16.3     21      72
 
 Percentage of the requests served within a certain time (ms)
-  50%     49
-  66%     62
-  75%     65
-  80%     67
-  90%     70
-  95%     73
-  98%     76
-  99%     79
- 100%    120 (longest request)
+  50%     21
+  66%     48
+  75%     52
+  80%     53
+  90%     55
+  95%     57
+  98%     58
+  99%     59
+ 100%     72 (longest request)
 ````
 
 ## Testing
@@ -75,9 +76,9 @@ pip3 install -r dev-requirements.txt
 
 First make sure that the server is running locally on `127.0.0.1:80` then you can follow the below guide to run the tests.
 
-All tests are located `src/tests` and can be run by using the following command inside the directory:
+All tests are located `tests` and can be run by using the following command inside the directory:
 ```commandline
-python -m unittest discover
+python -m unittest discover tests
 ```
 
 ### Current tests
