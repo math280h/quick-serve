@@ -2,14 +2,16 @@ import socket
 import signal
 import sys
 import asyncio
+from diskcache import Cache
 
-from src.modules import Connection
+from quick_serve.modules import Connection
 
 
 class Server:
     def __init__(self, config, log):
         self.config = config
         self.log = log
+        self.cache = Cache()
 
         self.shutdown = False
         signal.signal(signal.SIGINT, self.signal_handler)
@@ -41,9 +43,11 @@ class Server:
             except OSError as e:
                 if self.shutdown:
                     self.log.debug("Closing Socket...")
+                    return
                 else:
-                    self.log.critical("OSError Panic! Closing Socket... - {}".format(e))
+                    self.log.fatal("OSError Panic! Closing Socket... - {}".format(e))
                     self.sock.close()
                     sys.exit(0)
+
             # Create a task for the connection
-            await asyncio.create_task(Connection(self.config, self.log, client, address).handle())
+            await asyncio.create_task(Connection(self.config, self.log, client, address, self.cache).handle())

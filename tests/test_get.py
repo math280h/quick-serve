@@ -1,7 +1,7 @@
 import unittest
 import requests
 
-from src.modules import Config
+from quick_serve.modules import Config
 
 
 class Get(unittest.TestCase):

@@ -25,3 +25,6 @@ class Log:
 
     def critical(self, data):
         self.logger.critical(data)
+
+    def fatal(self, data):
+        self.logger.fatal(data)

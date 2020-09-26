@@ -1,26 +1,28 @@
 from io import BytesIO
 
-from src.modules.parser import Parser
-from src.modules.methods import Methods
-from src.modules.messenger import Messenger
-from src.modules.resource import Resource
+from quick_serve.modules.parser import Parser
+from quick_serve.modules.methods import Methods
+from quick_serve.modules.messenger import Messenger
+from quick_serve.modules.resource import Resource
 
 
 class Connection:
-    def __init__(self, config, log, conn, address):
+    def __init__(self, config, log, conn, address, cache):
         self.conn = conn
         self.address = address
 
         self.log = log
         self.config = config
-        self.parser = Parser()
-        self.messenger = Messenger(config, conn)
-        self.resource = Resource(config, log)
+        self.parser = Parser(config)
+        self.messenger = Messenger(config, log, conn)
+        self.resource = Resource(config, log, cache)
+        self.methods = Methods(config)
 
     async def handle(self):
         self.log.info('Accepted connection from: {}'.format(self.address[0]))
         state = ''
         with BytesIO() as buffer:
+            self.log.debug("Collecting data in buffer")
             while True:
                 try:
                     req = self.conn.recv(int(self.config.options.get("Server", "ByteReadSize")))
@@ -30,12 +32,15 @@ class Connection:
                     break
 
                 if state == 'BODY_INCOMPLETE':
+                    self.log.debug("Parsing Body")
                     state = self.parser.parse_request(req, headers_ok=True)
                     buffer.write(req)
                 else:
+                    self.log.debug("Parsing Request")
                     state = self.parser.parse_request(req)
                     buffer.write(req)
-                if state == 'DONE' or state == 'NO_BODY':
+                if state == 'DONE' or state == 'NO_BODY' or state == 'INVALID_CONTENT_LENGTH':
+                    self.log.debug("Done Parsing")
                     break
 
             buffer.seek(0)
@@ -56,38 +61,32 @@ class Connection:
             try:
                 method = data[0]
             except IndexError:
-                self.messenger.send_headers("400 Bad Request")
+                await self.messenger.send_headers("400 Bad Request")
                 self.conn.close()
                 return
 
-            try:
-                if data[1] == '' or data[1] == '/':
-                    data[1] = self.config.options.get("Server", "DefaultFile")
-            except IndexError:
-                self.messenger.send_headers("400 Bad Request")
+            if not self.methods.is_allowed(method):
+                await self.messenger.send_headers("405 Method Not Allowed")
                 self.conn.close()
                 return
 
-            resource = self.config.options.get("General", "WorkingDirectory") + data[1]
-
-            if not Methods(self.config).is_allowed(method):
-                self.messenger.send_headers("405 Method Not Allowed")
+            resource = await self.resource.check_valid_resource(data)
+            if resource is False:
+                await self.messenger.send_headers("400 Bad Request")
                 self.conn.close()
                 return
 
             if method == 'OPTIONS':
-                self.messenger.send_headers("200 OK", allow=True)
+                await self.messenger.send_headers("200 OK", allow=True)
             else:
                 data, content_length = await self.resource.get(resource, self.address[0])
                 if data is not False and content_length is not None:
                     # Send Response
-                    self.messenger.send_headers("200 OK", content_length=content_length)
+                    await self.messenger.send_data_with_headers("200 OK", data, content_length=content_length)
                     self.log.debug("Sent {} with content_length: {}".format("200 OK", content_length))
-                    self.messenger.send(data)
                 else:
                     # Send 404 because file doesn't exists
-                    self.messenger.send_headers("404 Not Found")
-                    self.messenger.send("Sorry, that file does not exist")
+                    await self.messenger.send_data_with_headers("404 Not Found", "Sorry, that file does not exist")
                     self.log.debug("404 - {} tried to access {}".format(self.address[0], resource))
 
             # Close connection when we have finished handling the request

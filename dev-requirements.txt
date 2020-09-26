@@ -1,3 +1,4 @@
 asyncio~=3.4.3
-requests~=2.24.0
 aiofiles~=0.5.0
+requests~=2.24.0
+diskcache~=5.0.3

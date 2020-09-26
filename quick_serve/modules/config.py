@@ -18,7 +18,8 @@ class Config:
                 'HttpVersion': '1.0',
                 'ByteReadSize': '8192',
                 'DefaultFile': 'index.html',
-                'SupportedMethods[]': 'GET, PUT, HEAD, POST, DELETE, OPTIONS'
+                'SupportedMethods[]': 'GET, PUT, HEAD, POST, DELETE, OPTIONS',
+                'DefaultEncoding': 'UTF-8'
             },
             'General': {
                 'ExtendedLogging': 'false',

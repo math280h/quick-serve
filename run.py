@@ -1,8 +1,8 @@
 import asyncio
 
-from src.modules import Log
-from src.modules import Config
-from src.server import Server
+from quick_serve.modules import Log
+from quick_serve.modules import Config
+from quick_serve.server import Server
 
 
 class QuickServe:

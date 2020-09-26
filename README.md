@@ -11,7 +11,7 @@ pip3 install -r requirements.txt
 
 Then run:
 ```commandline
-python3 quick-serve.py
+python3 run.py
 ```
 
 ## Configuration
