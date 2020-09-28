@@ -6,7 +6,9 @@ from quick_serve.server import Server
 
 
 class QuickServe:
+    """Main Application"""
     def __init__(self):
+        """Run the application"""
         # Init Config
         config = Config()
 

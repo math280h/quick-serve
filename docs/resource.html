@@ -1,0 +1,75 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module resource</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>resource</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/mnt/c/Users/hube3/PycharmProjects/quick-serve/quick_serve/modules/resource.py">/mnt/c/Users/hube3/PycharmProjects/quick-serve/quick_serve/modules/resource.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="aiofiles.html">aiofiles</a><br>
+</td><td width="25%" valign=top><a href="posixpath.html">posixpath</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="resource.html#Resource">Resource</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Resource">class <strong>Resource</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Resource">Resource</a>(config,&nbsp;log,&nbsp;cache)<br>
+&nbsp;<br>
+<a href="#Resource">Resource</a>&nbsp;Helper&nbsp;-&nbsp;Helps&nbsp;loading&nbsp;resources&nbsp;e.g.&nbsp;files&nbsp;from&nbsp;either&nbsp;cache&nbsp;or&nbsp;disk<br>
+&nbsp;<br>
+:param&nbsp;config:&nbsp;Config&nbsp;module&nbsp;instance<br>
+:param&nbsp;log:&nbsp;Log&nbsp;module&nbsp;instance<br>
+:param&nbsp;cache:&nbsp;Cache&nbsp;instance<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Resource-__init__"><strong>__init__</strong></a>(self, config, log, cache)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt>async <a name="Resource-check_valid_resource"><strong>check_valid_resource</strong></a>(self, data)</dt><dd><tt>Check&nbsp;if&nbsp;data&nbsp;contains&nbsp;a&nbsp;valid&nbsp;resource<br>
+&nbsp;<br>
+:param&nbsp;data:&nbsp;Request&nbsp;Data<br>
+:return:&nbsp;resource&nbsp;path&nbsp;||&nbsp;False</tt></dd></dl>
+
+<dl><dt>async <a name="Resource-get"><strong>get</strong></a>(self, req_resource: str, client=None)</dt><dd><tt>Tries&nbsp;to&nbsp;read&nbsp;the&nbsp;requested&nbsp;reqsource&nbsp;from&nbsp;either&nbsp;disk&nbsp;or&nbsp;cache<br>
+&nbsp;<br>
+:param&nbsp;req_resource:&nbsp;Path&nbsp;to&nbsp;requested&nbsp;resource&nbsp;as&nbsp;string<br>
+:param&nbsp;client:&nbsp;Client&nbsp;who&nbsp;tried&nbsp;to&nbsp;access&nbsp;the&nbsp;resource,&nbsp;only&nbsp;used&nbsp;for&nbsp;logging.<br>
+:return:&nbsp;file_contents,&nbsp;content_length&nbsp;||&nbsp;False,&nbsp;None</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module messenger</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>messenger</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/mnt/c/Users/hube3/PycharmProjects/quick-serve/quick_serve/modules/messenger.py">/mnt/c/Users/hube3/PycharmProjects/quick-serve/quick_serve/modules/messenger.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="messenger.html#Messenger">Messenger</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="Messenger">class <strong>Messenger</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#Messenger">Messenger</a>(config,&nbsp;log,&nbsp;conn)<br>
+&nbsp;<br>
+<a href="#Messenger">Messenger</a>&nbsp;Helper&nbsp;-&nbsp;Manages&nbsp;all&nbsp;responses&nbsp;to&nbsp;connection<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="Messenger-__init__"><strong>__init__</strong></a>(self, config, log, conn)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt>async <a name="Messenger-get_headers"><strong>get_headers</strong></a>(self, code: str, content_length=0, content_type='text/html; charset=utf-8;', allow=None)</dt><dd><tt>Gather&nbsp;&amp;&nbsp;Format&nbsp;Headers&nbsp;into&nbsp;single&nbsp;string<br>
+&nbsp;<br>
+:param&nbsp;code:&nbsp;HTTP&nbsp;Code&nbsp;(E.g.&nbsp;'200&nbsp;OK')<br>
+:param&nbsp;content_length:&nbsp;Encoded&nbsp;data&nbsp;Content-Length<br>
+:param&nbsp;content_type:&nbsp;Data&nbsp;Content-Type&nbsp;(E.g.&nbsp;'html/text;&nbsp;charset=utf-8;')<br>
+:param&nbsp;allow:&nbsp;Send&nbsp;Allow&nbsp;Header&nbsp;(Used&nbsp;for&nbsp;'OPTIONS'&nbsp;Request)<br>
+:return:&nbsp;Headers&nbsp;as&nbsp;string</tt></dd></dl>
+
+<dl><dt>async <a name="Messenger-send"><strong>send</strong></a>(self, data: str)</dt><dd><tt>Send&nbsp;Response&nbsp;to&nbsp;Connection<br>
+&nbsp;<br>
+:param&nbsp;data:&nbsp;Data&nbsp;to&nbsp;respond&nbsp;with</tt></dd></dl>
+
+<dl><dt>async <a name="Messenger-send_data_with_headers"><strong>send_data_with_headers</strong></a>(self, code: str, data: str, content_length=0, content_type='text/html; charset=utf-8;')</dt><dd><tt>Send&nbsp;some&nbsp;data&nbsp;with&nbsp;the&nbsp;header&nbsp;response<br>
+&nbsp;<br>
+:param&nbsp;code:&nbsp;HTTP&nbsp;Code&nbsp;(E.g.&nbsp;'200&nbsp;OK')<br>
+:param&nbsp;data:&nbsp;Data&nbsp;to&nbsp;append<br>
+:param&nbsp;content_length:&nbsp;Encoded&nbsp;data&nbsp;Content-Length<br>
+:param&nbsp;content_type:&nbsp;Data&nbsp;Content-Type&nbsp;(E.g.&nbsp;'html/text;&nbsp;charset=utf-8;')</tt></dd></dl>
+
+<dl><dt>async <a name="Messenger-send_headers"><strong>send_headers</strong></a>(self, code: str, content_length=0, content_type='text/html; charset=utf-8;', allow=None)</dt><dd><tt>Send&nbsp;headers<br>
+&nbsp;<br>
+:param&nbsp;code:&nbsp;HTTP&nbsp;Code&nbsp;(E.g.&nbsp;'200&nbsp;OK')<br>
+:param&nbsp;content_length:&nbsp;Encoded&nbsp;data&nbsp;Content-Length<br>
+:param&nbsp;content_type:&nbsp;Data&nbsp;Content-Type&nbsp;(E.g.&nbsp;'html/text;&nbsp;charset=utf-8;')<br>
+:param&nbsp;allow:&nbsp;Send&nbsp;Allow&nbsp;Header&nbsp;(Used&nbsp;for&nbsp;'OPTIONS'&nbsp;Request)</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table>
+</body></html>
