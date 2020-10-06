@@ -3,6 +3,7 @@ class Parser:
     def __init__(self, config):
         self.state = ''
         self.headers = {}
+        self.connection = {}
         self.encoding = config.options.get("Server", "DefaultEncoding")
         self.current_length = 0
 
@@ -18,6 +19,14 @@ class Parser:
             for ctx in content_type:  # Walk through each parameter in Content-Type
                 if "charset" in ctx:
                     self.encoding = ctx.split("=")[1].upper()  # Set the Encoding to the one specified in the Headers
+
+    def handle_keep_alive(self):
+        if "Connection" in self.headers:
+            if self.headers['Connection'] == 'Keep-Alive' and "Keep-Alive" in self.headers:
+                keep_alive = "".join(self.headers['Keep-Alive'].split()).split(",")
+                for ctx in keep_alive:  # Walk through each parameter in Content-Type
+                    item = ctx.split("=")
+                    self.connection[item[0]] = item[1]
 
     def verify_headers(self, req, headers_ok: bool):
         """Verify that the expected headers are present
@@ -53,13 +62,13 @@ class Parser:
 
                 if expected_length != self.current_length:  # If there is missing data from the body
                     self.set_state('BODY_INCOMPLETE')
-                else:  # Full body recieved
+                else:  # Full body received
                     self.set_state('DONE')
             else:  # No Content-Length was present
                 self.set_state('INVALID_CONTENT_LENGTH')
         except IndexError:  # Some of the body was in the request together with the headers and we are missing some
             self.set_state('BODY_INCOMPLETE')
-        if self.state != 'BODY_INCOMPLETE':  # We didn't find a body in the reqeuest
+        if self.state != 'BODY_INCOMPLETE':  # We didn't find a body in the request
             self.set_state('NO_BODY')
 
     def parse_request(self, req, headers_ok=False):
@@ -73,6 +82,8 @@ class Parser:
         self.verify_headers(req, headers_ok)
         # Set Encoding if header is present
         self.set_encoding()
+        # Check for Connection and Keep-Alive Header
+        self.handle_keep_alive()
         # Check if the request contains a body
         self.check_for_body(req, headers_ok)
         # Return current state

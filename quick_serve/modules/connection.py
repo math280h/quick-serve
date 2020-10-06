@@ -1,4 +1,5 @@
 from io import BytesIO
+from datetime import datetime, timedelta
 
 from quick_serve.modules.parser import Parser
 from quick_serve.modules.methods import Methods
@@ -20,6 +21,14 @@ class Connection:
         self.conn = conn
         self.address = address
 
+        # Keep Alive
+        self.keep_alive = False
+        self.timed_out = False
+        self.timeout = 0
+        self.max = 0
+        self.req_count = 0
+        self.last_req = 0
+
         # Define Modules
         self.log = log
         self.config = config
@@ -37,15 +46,34 @@ class Connection:
         with BytesIO() as buffer:
             self.log.debug("Collecting data in buffer")
             # While the buffer is open
+            print(self.keep_alive)
             while True:
                 try:
-                    # Try to recieve data
+                    # Try to receive data
                     req = self.conn.recv(int(self.config.options.get("Server", "ByteReadSize")))
                 except (BlockingIOError, ConnectionAbortedError, ConnectionResetError) as e:
                     self.log.debug('Connection was closed by client: {}'.format(e))
                 if not req:
-                    break
-
+                    if not self.keep_alive:
+                        break
+                    else:
+                        if self.last_req > datetime.now() - timedelta(seconds=self.timeout):
+                            continue
+                        else:
+                            self.timeout = True
+                            break
+                print("Trying to read")
+                # We received another request from same connection
+                if self.keep_alive:
+                    # Check if we have exceeded the limit
+                    if self.req_count >= self.max:
+                        print("Max Requests")
+                        break
+                    if self.timed_out:
+                        print("Timed out")
+                        break
+                    self.req_count += 1
+                print("handling Body")
                 if state == 'BODY_INCOMPLETE':
                     # Some of the body was missing from last request so read the next part as body
                     self.log.debug("Parsing Body")
@@ -61,6 +89,15 @@ class Connection:
                     self.log.debug("Done Parsing")
                     break
 
+            if self.keep_alive:
+                if self.req_count >= self.max:
+                    self.log.debug("Closing Connection with: {} - Max requests exceeded".format(self.address[0]))
+                    self.conn.close()
+                    return
+                if self.timed_out:
+                    self.log.debug("Closing Connection with: {} - Keep-Alive timed out".format(self.address[0]))
+                    self.conn.close()
+                    return
             # Point Buffer to the start
             buffer.seek(0)
             # Holds if we read all headers
@@ -69,6 +106,8 @@ class Connection:
             data = []
             # Request Body
             body = ""
+            # Define Headers
+            headers = self.parser.headers
 
             # Get the full body plus headers
             for index, line in enumerate(buffer):
@@ -81,7 +120,7 @@ class Connection:
                     else:
                         body += line.decode(self.parser.encoding)
 
-            # Check if we recieved a method
+            # Check if we received a method
             try:
                 method = data[0]
             except IndexError:
@@ -108,16 +147,31 @@ class Connection:
                 await self.messenger.send_headers("200 OK", allow=True)
             else:
                 # Try to gather the resource
-                data, content_length = await self.resource.get(resource, self.address[0])
-                if data is not False and content_length is not None:
+                content_data, content_length = await self.resource.get(resource, self.address[0])
+                if content_data is not False and content_length is not None:
                     # If the resource was found and loaded, Send Response
-                    await self.messenger.send_data_with_headers("200 OK", data, content_length=content_length)
+                    await self.messenger.send_data_with_headers("200 OK", content_data, content_length=content_length)
                     self.log.debug("Sent {} with content_length: {}".format("200 OK", content_length))
                 else:
                     # If the resource was not found or loaded Send 404 because file doesn't exists
                     await self.messenger.send_data_with_headers("404 Not Found", "Sorry, that file does not exist")
                     self.log.debug("404 - {} tried to access {}".format(self.address[0], resource))
 
+            # Handle Keep-Alive
+            if "Connection" in headers:
+                if "timeout" in self.parser.connection:
+                    self.timeout = int(self.parser.connection["timeout"])
+                if "max" in self.parser.connection:
+                    self.max = int(self.parser.connection["max"])
+                if self.timeout != 0 and self.max != 0:
+                    self.log.debug("Keep-Alive present, waiting for more requests - Client: {}".format(self.address[0]))
+                    self.last_req = datetime.now()
+                    self.keep_alive = True
+                    await self.handle()
+            else:
+                self.keep_alive = False
+                self.max = 0
+                self.timeout = 0
             # Close connection when we have finished handling the request
             self.log.debug("Closing Connection with: {}".format(self.address[0]))
             self.conn.close()
