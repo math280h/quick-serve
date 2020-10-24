@@ -34,8 +34,7 @@ class Config:
                 # Try to add a section
                 self.options.add_section(section)
             except configparser.DuplicateSectionError:
-                # If DuplicateSection, we expect the user defined it
-                print("Section Exists - Using User Input")
+                exists = True
             for option in expected_config[section]:
                 # For every Option in that section
                 if not self.options.has_option(section, option):

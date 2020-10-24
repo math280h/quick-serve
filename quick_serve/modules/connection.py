@@ -95,7 +95,7 @@ class Connection:
                 self.conn.close()
                 return
 
-            # Check if we recived a valid resource
+            # Check if we received a valid resource
             resource = await self.resource.check_valid_resource(data)
             if resource is False:
                 await self.messenger.send_headers("400 Bad Request")
@@ -108,10 +108,11 @@ class Connection:
                 await self.messenger.send_headers("200 OK", allow=True)
             else:
                 # Try to gather the resource
-                data, content_length = await self.resource.get(resource, self.address[0])
+                data, content_length, mime_type, encoding = await self.resource.get(resource, self.address[0])
                 if data is not False and content_length is not None:
                     # If the resource was found and loaded, Send Response
-                    await self.messenger.send_data_with_headers("200 OK", data, content_length=content_length)
+                    content_type = mime_type + "; charset=" + str(encoding).lower() + ";"
+                    await self.messenger.send_data_with_headers("200 OK", data, content_length=content_length, content_type=content_type)
                     self.log.debug("Sent {} with content_length: {}".format("200 OK", content_length))
                 else:
                     # If the resource was not found or loaded Send 404 because file doesn't exists
