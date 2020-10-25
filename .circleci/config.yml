@@ -10,5 +10,6 @@ jobs:
       - run: sudo pip install -r dev-requirements.txt
       - run: echo "<h1>This is an HTML File</h1>" > ~/index.html
       - run: sudo mkdir /var/www && sudo mv ~/index.html /var/www/
+      - run: sudo sed -i 's/ExtendedLogging=false/ExtendedLogging=true/' ~/quick_serve/quick_serve/config.ini
       - run: sudo -b python run.py
       - run: python -m unittest discover tests
