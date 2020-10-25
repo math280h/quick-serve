@@ -3,8 +3,10 @@ import chardet
 
 from os import path
 
+from typing import Tuple
 
-def match_mime_type(ext):
+
+def match_mime_type(ext: str) -> str:
     """Tries to match Mime Type to File Extension
 
     :param ext: File Extension as String
@@ -34,12 +36,12 @@ class Resource:
     :param cache: Cache instance
     """
 
-    def __init__(self, config, log, cache):
+    def __init__(self, config, log, cache) -> None:
         self.config = config
         self.log = log
         self.cache = cache
 
-    async def check_valid_resource(self, data):
+    async def check_valid_resource(self, data: list) -> str or bool:
         """Check if data contains a valid resource
 
         :param data: Request Data
@@ -54,7 +56,7 @@ class Resource:
         except IndexError:  # No resource was specified, invalid request
             return False
 
-    async def detect_encoding(self, raw_data):
+    async def detect_encoding(self, raw_data: bytes) -> str:
         """Tries to detect the encoding for a file.
 
         :param raw_data: Data as Bytes or ByteArray
@@ -65,7 +67,7 @@ class Resource:
         except Exception as e:
             self.log.critical("Something went wrong with detecting encoding:" + str(e))
 
-    async def get(self, req_resource: str, client=None):
+    async def get(self, req_resource: str, client=None) -> Tuple[any, int, str, str] or Tuple[bool, None, None, None]:
         """Tries to read the requested resource from either disk or cache
 
         :param req_resource: Path to requested resource as string

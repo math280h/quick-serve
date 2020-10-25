@@ -8,11 +8,11 @@ from quick_serve.modules import Connection
 
 
 class Server:
-    """Server, the main compnent that handles listening for connections and accepting them
+    """Server, the main component that handles listening for connections and accepting them
     :param config: Configuration Class
     :param log: Log Class
     """
-    def __init__(self, config, log):
+    def __init__(self, config, log) -> None:
         # Define Config, Log & Cache
         self.config = config
         self.log = log
@@ -33,7 +33,7 @@ class Server:
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.sock.bind((self.host, self.port))
 
-    def signal_handler(self, sig, frame):
+    def signal_handler(self, sig: int, frame: any) -> None:
         """Handles SIGINT and other signals.
 
         :param sig: Signal Value
@@ -41,12 +41,12 @@ class Server:
         """
         # If SIG is SIGINT - Shut down the server
         if sig == 2:
-            self.log.info("Shutting Down.")
+            self.log.info("Shutting Down... Frame: " + frame.f_code.co_name)
             self.shutdown = True
             self.sock.close()
             sys.exit(0)
 
-    async def listen(self):
+    async def listen(self) -> None:
         """Listen for Connections"""
         # Wait for a connection
         self.sock.listen()
@@ -62,7 +62,7 @@ class Server:
                     self.log.debug("Closing Socket...")
                     return
                 else:
-                    # System apeared to crash
+                    # System appeared to crash
                     self.log.fatal("OSError Panic! Closing Socket... - {}".format(e))
                     self.sock.close()
                     sys.exit(0)

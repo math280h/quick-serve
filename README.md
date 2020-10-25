@@ -31,6 +31,8 @@ quick-serve has two different config files, on for defining log configuration kn
         * Port - Default: 80 - This specifies the port quick-serve should listen on
     * HttpVersion
         * HTTP Version - Default: 1.0 - This specifies which version of HTTP the server itself uses and includes in responses
+    * ByteReadSize
+        * Buffer Read Size - Default: 8192 - This specifies how many bytes the buffer should read at a time.
     * DefaultFile
         * Path - Default: /index.html - This specifies the file quick-serve should refer to if the requested resource is e.g. `/`
     * SupportedMethods[]
@@ -92,6 +94,11 @@ python -m unittest discover tests
         * Test that we get content back when requesting default file
     * test_secure_path
         * Test that we cannot access paths outside of the working directory
-        
+* Resource
+    * test_content_type
+        * Test that we send the expected content_type for the given resource.
+    * test_content_length
+        * Test that we send the expected content_length for the given resource.
+
 ## Other
 A big thanks to Kibb#4205 for starting this challenge on [TPH](https://theprogrammershangout.com/resources/projects/http-project-guide/intro.md)

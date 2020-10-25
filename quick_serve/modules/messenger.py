@@ -1,11 +1,11 @@
 class Messenger:
     """Messenger Helper - Manages all responses to connection"""
-    def __init__(self, config, log, conn):
+    def __init__(self, config, log, conn) -> None:
         self.conn = conn
         self.config = config
         self.log = log
 
-    async def send(self, data: str):
+    async def send(self, data: str) -> None:
         """Send Response to Connection
 
         :param data: Data to respond with
@@ -15,7 +15,8 @@ class Messenger:
         except Exception as e:
             self.log.error("Unable to send response", e)
 
-    async def get_headers(self, code: str, content_length=0, content_type="text/html; charset=utf-8;", allow=None):
+    async def get_headers(self, code: str, content_length: int = 0, content_type: str = "text/html; charset=utf-8;",
+                          allow: bool = None) -> str:
         """Gather & Format Headers into single string
 
         :param code: HTTP Code (E.g. '200 OK')
@@ -32,7 +33,8 @@ class Messenger:
         headers += "\r\n"  # Specify end of Headers
         return headers
 
-    async def send_headers(self, code: str, content_length=0, content_type="text/html; charset=utf-8;", allow=None):
+    async def send_headers(self, code: str, content_length: int = 0, content_type: str = "text/html; charset=utf-8;",
+                           allow: bool = None) -> None:
         """Send headers
 
         :param code: HTTP Code (E.g. '200 OK')
@@ -43,8 +45,8 @@ class Messenger:
         headers = await self.get_headers(code, content_length, content_type, allow)
         await self.send(headers)
 
-    async def send_data_with_headers(self, code: str, data: str, content_length=0, content_type="text/html; "
-                                                                                                "charset=utf-8;"):
+    async def send_data_with_headers(self, code: str, data: str, content_length: int = 0,
+                                     content_type: str = "text/html; charset=utf-8;") -> None:
         """Send some data with the header response
 
         :param code: HTTP Code (E.g. '200 OK')

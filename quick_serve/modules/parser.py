@@ -1,17 +1,20 @@
+from typing import Tuple
+
+
 class Parser:
-    """Parser for incomming HTTP data"""
-    def __init__(self, config):
+    """Parser for incoming HTTP data"""
+    def __init__(self, config) -> None:
         self.state = ''
         self.headers = {}
         self.encoding = config.options.get("Server", "DefaultEncoding")
         self.current_length = 0
 
-    def set_state(self, state):
+    def set_state(self, state: str) -> None:
         """Overwrite current state if it's either empty or the body is incomplete"""
         if self.state == '' or self.state == 'BODY_INCOMPLETE':
             self.state = state
 
-    def set_encoding(self):
+    def set_encoding(self) -> None:
         """If the Content-Type header is set, try to get the encoding"""
         if "Content-Type" in self.headers:  # Check if the Content-Type header is present
             content_type = "".join(self.headers["Content-Type"].split()).split(";")  # Split Content-Type into an array
@@ -19,7 +22,7 @@ class Parser:
                 if "charset" in ctx:
                     self.encoding = ctx.split("=")[1].upper()  # Set the Encoding to the one specified in the Headers
 
-    def verify_headers(self, req, headers_ok: bool):
+    def verify_headers(self, req: any, headers_ok: bool) -> None:
         """Verify that the expected headers are present
 
         :param req: HTTP Request
@@ -35,7 +38,7 @@ class Parser:
             except (UnicodeDecodeError, IndexError):
                 self.set_state('NO_HEADERS')
 
-    def check_for_body(self, req, headers_ok: bool):
+    def check_for_body(self, req: any, headers_ok: bool) -> None:
         """If a body is present in the request, try to get it
 
         :param req: HTTP Request
@@ -53,16 +56,16 @@ class Parser:
 
                 if expected_length != self.current_length:  # If there is missing data from the body
                     self.set_state('BODY_INCOMPLETE')
-                else:  # Full body recieved
+                else:  # Full body received
                     self.set_state('DONE')
             else:  # No Content-Length was present
                 self.set_state('INVALID_CONTENT_LENGTH')
         except IndexError:  # Some of the body was in the request together with the headers and we are missing some
             self.set_state('BODY_INCOMPLETE')
-        if self.state != 'BODY_INCOMPLETE':  # We didn't find a body in the reqeuest
+        if self.state != 'BODY_INCOMPLETE':  # We didn't find a body in the request
             self.set_state('NO_BODY')
 
-    def parse_request(self, req, headers_ok=False):
+    def parse_request(self, req: any, headers_ok: bool = False) -> str:
         """Parse an HTTP Request
 
         :param req: HTTP Request
@@ -77,3 +80,25 @@ class Parser:
         self.check_for_body(req, headers_ok)
         # Return current state
         return self.state
+
+    async def parse_buffer(self, buffer) -> Tuple[list, str, bool]:
+        # Point Buffer to the start
+        buffer.seek(0)
+        # Holds if we read all headers
+        end_of_headers = False
+        # Request Data
+        data = []
+        # Request Body
+        body = ""
+
+        # Get the full body plus headers
+        for index, line in enumerate(buffer):
+            if index == 0:
+                data = line.decode(self.encoding).split()
+            else:
+                if not end_of_headers:
+                    if line == b'\r\n':
+                        end_of_headers = True
+                else:
+                    body += line.decode(self.encoding)
+        return data, body, end_of_headers

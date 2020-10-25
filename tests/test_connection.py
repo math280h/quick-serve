@@ -15,7 +15,8 @@ class Connection(unittest.TestCase):
         Test that we get the correct headers when requesting OPTIONS
         :return:
         """
-        req = requests.options("http://{}:{}".format(self.config.options.get("Server", "ListenAddress"), self.config.options.get("Server", "Port")))
+        req = requests.options("http://{}:{}".format(self.config.options.get("Server", "ListenAddress"),
+                                                     self.config.options.get("Server", "Port")))
 
         self.assertEqual(req.headers, {'Server': 'quick-serve', 'Allow': 'GET, PUT, HEAD, POST, DELETE, OPTIONS'})
 
@@ -24,7 +25,8 @@ class Connection(unittest.TestCase):
         Test that we can successfully connect to the server
         :return:
         """
-        req = requests.get("http://{}:{}".format(self.config.options.get("Server", "ListenAddress"), self.config.options.get("Server", "Port")))
+        req = requests.get("http://{}:{}".format(self.config.options.get("Server", "ListenAddress"),
+                                                 self.config.options.get("Server", "Port")))
 
         self.assertEqual(req.status_code, 200)
 

@@ -3,11 +3,11 @@ class Methods:
 
     :param config
     """
-    def __init__(self, config):
+    def __init__(self, config) -> None:
         self.config = config
         self.allowed_methods = self.config.options.get("Server", "SupportedMethods[]")
 
-    def is_allowed(self, method: str):
+    def is_allowed(self, method: str) -> bool:
         """Checks if a method is allowed
 
         :param method: HTTP Method

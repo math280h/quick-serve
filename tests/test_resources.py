@@ -38,7 +38,9 @@ class ResourceTest(unittest.TestCase):
         Test that we get the correct headers when requesting OPTIONS
         :return:
         """
-        req = requests.get("http://{}:{}/{}".format(self.config.options.get("Server", "ListenAddress"), self.config.options.get("Server", "Port"), self.config.options.get("Server", "DefaultFile")))
+        req = requests.get("http://{}:{}/{}".format(self.config.options.get("Server", "ListenAddress"),
+                                                    self.config.options.get("Server", "Port"),
+                                                    self.config.options.get("Server", "DefaultFile")))
         content_type = req.headers['Content-Type'].split(";")
         _, file_extension = path.splitext(self.config.options.get("Server", "DefaultFile"))
         expected_type = match_mime_type(file_extension)
